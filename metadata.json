@@ -1,0 +1,6 @@
+{
+  "name": "CrossMart Admin",
+  "description": "CrossMart Admin Console - Mobile admin app for bot owners and staff to manage orders, products, customers, and AI settings.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
