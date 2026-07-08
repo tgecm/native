@@ -29,11 +29,8 @@ jobs:
             -keyalg RSA -keysize 2048 -validity 10000 \
             -dname "CN=Android Debug,O=Android,C=US"
 
-      - name: Clean build cache
-        run: chmod +x gradlew && ./gradlew clean --no-configuration-cache || true
-
       - name: Build debug APK
-        run: chmod +x gradlew && ./gradlew assembleDebug --no-configuration-cache --no-build-cache
+        run: chmod +x gradlew && ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4

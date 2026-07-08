@@ -91,11 +91,12 @@ fun LoginScreen(
                 Box(
                     modifier = Modifier
                         .size(100.dp)
-                        .clip(RoundedCornerShape(24.dp)),
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(IndigoPrimary),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
-                        painter = painterResource(id = com.example.R.drawable.ic_logo_foreground),
+                        painter = painterResource(id = com.example.R.mipmap.ic_launcher),
                         contentDescription = "Logo",
                         modifier = Modifier.size(100.dp),
                         contentScale = ContentScale.Fit
