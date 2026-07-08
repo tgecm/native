@@ -33,13 +33,12 @@ fun LoginScreen(
     viewModel: MainViewModel,
     onLoginSuccess: () -> Unit
 ) {
-    val isDemoMode by viewModel.isDemoMode.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
 
     var isOwnerLogin by remember { mutableStateOf(true) }
-    var email by remember { mutableStateOf("owner@crossmart.com") }
-    var password by remember { mutableStateOf("password") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
     // 2FA Step State
     var step2FA by remember { mutableStateOf(false) }
@@ -56,32 +55,6 @@ fun LoginScreen(
             .background(gradientBrush),
         contentAlignment = Alignment.Center
     ) {
-        // Toggle Demo Mode in upper right
-        Row(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .safeDrawingPadding()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = if (isDemoMode) "Demo / Sandbox Mode" else "Live API Mode",
-                color = Color.White.copy(alpha = 0.8f),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(end = 8.dp)
-            )
-            Switch(
-                checked = isDemoMode,
-                onCheckedChange = { viewModel.setDemoMode(it) },
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = EmeraldSuccess,
-                    checkedTrackColor = EmeraldSuccess.copy(alpha = 0.4f)
-                ),
-                modifier = Modifier.testTag("demo_mode_toggle")
-            )
-        }
-
         Card(
             modifier = Modifier
                 .fillMaxWidth(0.9f)
@@ -117,7 +90,7 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "CrossMart Admin",
+                    text = "CrossMart",
                     style = MaterialTheme.typography.headlineMedium.copy(
                         fontWeight = FontWeight.Black,
                         color = IndigoPrimary,
@@ -160,7 +133,6 @@ fun LoginScreen(
                                     selected = isOwnerLogin,
                                     onClick = {
                                         isOwnerLogin = true
-                                        email = "owner@crossmart.com"
                                     },
                                     text = { Text("Owner Login", fontWeight = FontWeight.Bold) },
                                     modifier = Modifier.testTag("owner_tab")
@@ -169,7 +141,6 @@ fun LoginScreen(
                                     selected = !isOwnerLogin,
                                     onClick = {
                                         isOwnerLogin = false
-                                        email = "zarni_admin"
                                     },
                                     text = { Text("Staff Login", fontWeight = FontWeight.Bold) },
                                     modifier = Modifier.testTag("staff_tab")
@@ -251,15 +222,15 @@ fun LoginScreen(
                             Button(
                                 onClick = {
                                     if (isOwnerLogin) {
-                                        viewModel.loginOwner(email, password) { token ->
+                                        viewModel.loginOwner(email, password, onStep2FA = { token ->
                                             loginToken2FA = token
                                             step2FA = true
-                                        }
+                                        }, onAutoLogin = onLoginSuccess)
                                     } else {
-                                        viewModel.loginStaff(email, password) { token ->
+                                        viewModel.loginStaff(email, password, onStep2FA = { token ->
                                             loginToken2FA = token
                                             step2FA = true
-                                        }
+                                        }, onAutoLogin = onLoginSuccess)
                                     }
                                 },
                                 colors = ButtonDefaults.buttonColors(containerColor = IndigoPrimary),
@@ -458,6 +429,7 @@ fun LoginScreen(
                                     .clickable {
                                         step2FA = false
                                         verificationCode = ""
+                                        viewModel.stopPollingLogin()
                                     }
                                     .testTag("back_to_credentials")
                             )

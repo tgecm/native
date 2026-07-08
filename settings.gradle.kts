@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "CrossMart Admin"
+rootProject.name = "CrossMart"
 
 include(":app")
