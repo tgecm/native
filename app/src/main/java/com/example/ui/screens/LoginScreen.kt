@@ -15,10 +15,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.text.style.TextAlign
@@ -44,6 +48,18 @@ fun LoginScreen(
     var step2FA by remember { mutableStateOf(false) }
     var loginToken2FA by remember { mutableStateOf("") }
     var verificationCode by remember { mutableStateOf("") }
+
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    // Auto-focus the OTP input when entering 2FA and show keyboard
+    LaunchedEffect(step2FA) {
+        if (step2FA) {
+            kotlinx.coroutines.delay(300)
+            focusRequester.requestFocus()
+            keyboardController?.show()
+        }
+    }
 
     val gradientBrush = Brush.linearGradient(
         colors = listOf(IndigoPrimary, Slate900)
@@ -74,16 +90,15 @@ fun LoginScreen(
                 // Header Logo
                 Box(
                     modifier = Modifier
-                        .size(64.dp)
-                        .clip(RoundedCornerShape(18.dp))
-                        .background(IndigoPrimary),
+                        .size(100.dp)
+                        .clip(RoundedCornerShape(24.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.ShoppingBag,
+                    Image(
+                        painter = painterResource(id = com.example.R.drawable.ic_logo_foreground),
                         contentDescription = "Logo",
-                        tint = Color.White,
-                        modifier = Modifier.size(36.dp)
+                        modifier = Modifier.size(100.dp),
+                        contentScale = ContentScale.Fit
                     )
                 }
 
@@ -294,7 +309,12 @@ fun LoginScreen(
                             // OTP Boxes Layout
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        focusRequester.requestFocus()
+                                        keyboardController?.show()
+                                    },
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 (0 until 6).forEach { index ->
@@ -323,7 +343,6 @@ fun LoginScreen(
                             }
 
                             // Invisible keyboard driver input
-                            val keyboardController = LocalSoftwareKeyboardController.current
                             OutlinedTextField(
                                 value = verificationCode,
                                 onValueChange = { input ->
@@ -347,6 +366,7 @@ fun LoginScreen(
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                 modifier = Modifier
                                     .size(1.dp)
+                                    .focusRequester(focusRequester)
                                     .testTag("otp_hidden_input"),
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = Color.Transparent,

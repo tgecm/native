@@ -192,13 +192,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 try {
                     val api = apiService ?: continue
                     val response = api.pollLoginApproval(loginToken)
-                    if (response["success"] == true || response["approved"] == true) {
+                    if (response["status"] == "approved") {
                         val jwt = response["token"] as? String ?: ""
                         _token.value = jwt
                         _isLoggedIn.value = true
                         _isStaffUser.value = isStaff
                         refreshAllData()
                         onApproved()
+                        return@launch
+                    } else if (response["status"] == "expired") {
+                        _errorMessage.value = "Login request expired. Please try again."
                         return@launch
                     }
                 } catch (e: Exception) {
